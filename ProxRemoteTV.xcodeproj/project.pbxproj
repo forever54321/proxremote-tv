@@ -1,0 +1,405 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		44B8E09E34048CDDB3DE1365 /* ProxRemoteTVApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5506C6C850C3CAE9D7756A54 /* ProxRemoteTVApp.swift */; };
+		4C3139D871D92091F85AF265 /* PairingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52588AA9A8E40B6517DE3B8 /* PairingView.swift */; };
+		559E33C3CCF6C46A94509A02 /* ServerProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACBB2AA03340EAFE39548820 /* ServerProfile.swift */; };
+		5B7E5857DB777278ADEBF1E2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FBD115E61F91891BA80DF293 /* Assets.xcassets */; };
+		6099F096316E33B1F2CE282E /* VMDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CF7F858205EAA786FCE5EA9 /* VMDetailView.swift */; };
+		7AA8801948708F9C1F5912FC /* PairingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C743E2CD60D3A402CB92C0E3 /* PairingService.swift */; };
+		8605EEF1607D3FABE8F41A49 /* ServerListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA246BF8D0A044C258B8117B /* ServerListView.swift */; };
+		A5E1530D6E181EB963DE3703 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D54895D8AE97F5F6CD59392 /* DashboardView.swift */; };
+		ABCD000100000001 /* ScreenSaverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABCD000100000002 /* ScreenSaverView.swift */; };
+		ABCD000200000001 /* ClusterTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABCD000200000002 /* ClusterTask.swift */; };
+		ABCD000300000001 /* NotificationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABCD000300000002 /* NotificationsView.swift */; };
+		B22F8C236D113802C55338C8 /* ProxmoxAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 876B01FE61A15A55282A9467 /* ProxmoxAPI.swift */; };
+		EBEF79A5CDDF845E4EEEA15A /* NodeDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C1A9063787E5FE56A8B36EB /* NodeDetailView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		0C1A9063787E5FE56A8B36EB /* NodeDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NodeDetailView.swift; sourceTree = "<group>"; };
+		0D54895D8AE97F5F6CD59392 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
+		1CF7F858205EAA786FCE5EA9 /* VMDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VMDetailView.swift; sourceTree = "<group>"; };
+		3C25D196E3618DDCDB8C8830 /* ProxRemoteTV.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = ProxRemoteTV.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		5506C6C850C3CAE9D7756A54 /* ProxRemoteTVApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProxRemoteTVApp.swift; sourceTree = "<group>"; };
+		779FE9A33643DDF723BB1B17 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		876B01FE61A15A55282A9467 /* ProxmoxAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProxmoxAPI.swift; sourceTree = "<group>"; };
+		ABCD000100000002 /* ScreenSaverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenSaverView.swift; sourceTree = "<group>"; };
+		ABCD000200000002 /* ClusterTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClusterTask.swift; sourceTree = "<group>"; };
+		ABCD000300000002 /* NotificationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsView.swift; sourceTree = "<group>"; };
+		ACBB2AA03340EAFE39548820 /* ServerProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerProfile.swift; sourceTree = "<group>"; };
+		B52588AA9A8E40B6517DE3B8 /* PairingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PairingView.swift; sourceTree = "<group>"; };
+		C743E2CD60D3A402CB92C0E3 /* PairingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PairingService.swift; sourceTree = "<group>"; };
+		CA246BF8D0A044C258B8117B /* ServerListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerListView.swift; sourceTree = "<group>"; };
+		FBD115E61F91891BA80DF293 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A9A6BBC16C794A2BCEA0D8B6 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		3776D2DC4790F44BF4414E39 /* ProxRemoteTV */ = {
+			isa = PBXGroup;
+			children = (
+				FBD115E61F91891BA80DF293 /* Assets.xcassets */,
+				779FE9A33643DDF723BB1B17 /* Info.plist */,
+				5506C6C850C3CAE9D7756A54 /* ProxRemoteTVApp.swift */,
+				D1197647F9BD70B7A698F4F1 /* Models */,
+				74F96B74A095C59C2A504F62 /* Services */,
+				8BA056D2C2F537C73E3DD762 /* Views */,
+			);
+			path = ProxRemoteTV;
+			sourceTree = "<group>";
+		};
+		74F96B74A095C59C2A504F62 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				C743E2CD60D3A402CB92C0E3 /* PairingService.swift */,
+				876B01FE61A15A55282A9467 /* ProxmoxAPI.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		801879D62FAA858300676C36 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		8BA056D2C2F537C73E3DD762 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				0D54895D8AE97F5F6CD59392 /* DashboardView.swift */,
+				0C1A9063787E5FE56A8B36EB /* NodeDetailView.swift */,
+				B52588AA9A8E40B6517DE3B8 /* PairingView.swift */,
+				CA246BF8D0A044C258B8117B /* ServerListView.swift */,
+				1CF7F858205EAA786FCE5EA9 /* VMDetailView.swift */,
+				ABCD000100000002 /* ScreenSaverView.swift */,
+				ABCD000300000002 /* NotificationsView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		AE03913F263A995C6AA0807D /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				3C25D196E3618DDCDB8C8830 /* ProxRemoteTV.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		AE5BB015F216EA5A71A84166 = {
+			isa = PBXGroup;
+			children = (
+				3776D2DC4790F44BF4414E39 /* ProxRemoteTV */,
+				801879D62FAA858300676C36 /* Frameworks */,
+				AE03913F263A995C6AA0807D /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		D1197647F9BD70B7A698F4F1 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				ACBB2AA03340EAFE39548820 /* ServerProfile.swift */,
+				ABCD000200000002 /* ClusterTask.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		AF93327AEE739DABD5C1DCB5 /* ProxRemoteTV */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A4F539135E3B33C99619BB30 /* Build configuration list for PBXNativeTarget "ProxRemoteTV" */;
+			buildPhases = (
+				7C7A4C672BB42A67EBE72318 /* Sources */,
+				1B0A454651E35E019FAB93E4 /* Resources */,
+				A9A6BBC16C794A2BCEA0D8B6 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ProxRemoteTV;
+			productName = ProxRemoteTV;
+			productReference = 3C25D196E3618DDCDB8C8830 /* ProxRemoteTV.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		0D3262CB64B3BBAF08D7A2ED /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastSwiftUpdateCheck = 2640;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					801879D42FAA858300676C36 = {
+						CreatedOnToolsVersion = 26.4.1;
+					};
+					AF93327AEE739DABD5C1DCB5 = {
+						DevelopmentTeam = "";
+					};
+				};
+			};
+			buildConfigurationList = FF5A563B5B372D098107B2E5 /* Build configuration list for PBXProject "ProxRemoteTV" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = AE5BB015F216EA5A71A84166;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = AE03913F263A995C6AA0807D /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				AF93327AEE739DABD5C1DCB5 /* ProxRemoteTV */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		1B0A454651E35E019FAB93E4 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5B7E5857DB777278ADEBF1E2 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		7C7A4C672BB42A67EBE72318 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A5E1530D6E181EB963DE3703 /* DashboardView.swift in Sources */,
+				EBEF79A5CDDF845E4EEEA15A /* NodeDetailView.swift in Sources */,
+				7AA8801948708F9C1F5912FC /* PairingService.swift in Sources */,
+				4C3139D871D92091F85AF265 /* PairingView.swift in Sources */,
+				44B8E09E34048CDDB3DE1365 /* ProxRemoteTVApp.swift in Sources */,
+				B22F8C236D113802C55338C8 /* ProxmoxAPI.swift in Sources */,
+				8605EEF1607D3FABE8F41A49 /* ServerListView.swift in Sources */,
+				559E33C3CCF6C46A94509A02 /* ServerProfile.swift in Sources */,
+				6099F096316E33B1F2CE282E /* VMDetailView.swift in Sources */,
+				ABCD000100000001 /* ScreenSaverView.swift in Sources */,
+				ABCD000200000001 /* ClusterTask.swift in Sources */,
+				ABCD000300000001 /* NotificationsView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		06F1051D3D73677FE94F4BDF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 4;
+				DEVELOPMENT_TEAM = 3H92QZGF9X;
+				INFOPLIST_FILE = ProxRemoteTV/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.proxremote.tv;
+				SDKROOT = appletvos;
+				SUPPORTED_PLATFORMS = "appletvsimulator appletvos";
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 3;
+				TVOS_DEPLOYMENT_TARGET = 16.0;
+			};
+			name = Release;
+		};
+		165A0D73B92CCC87F51FB77F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = appletvos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TVOS_DEPLOYMENT_TARGET = 16.0;
+			};
+			name = Debug;
+		};
+		CD180D02F75064E2ED724D57 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = appletvos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TVOS_DEPLOYMENT_TARGET = 16.0;
+			};
+			name = Release;
+		};
+		FE73A6037494B894A14E31A7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 4;
+				DEVELOPMENT_TEAM = 3H92QZGF9X;
+				INFOPLIST_FILE = ProxRemoteTV/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.proxremote.tv;
+				SDKROOT = appletvos;
+				SUPPORTED_PLATFORMS = "appletvsimulator appletvos";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 3;
+				TVOS_DEPLOYMENT_TARGET = 16.0;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A4F539135E3B33C99619BB30 /* Build configuration list for PBXNativeTarget "ProxRemoteTV" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FE73A6037494B894A14E31A7 /* Debug */,
+				06F1051D3D73677FE94F4BDF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		FF5A563B5B372D098107B2E5 /* Build configuration list for PBXProject "ProxRemoteTV" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				165A0D73B92CCC87F51FB77F /* Debug */,
+				CD180D02F75064E2ED724D57 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 0D3262CB64B3BBAF08D7A2ED /* Project object */;
+}
