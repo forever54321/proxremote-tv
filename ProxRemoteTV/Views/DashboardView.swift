@@ -109,6 +109,24 @@ struct DashboardView: View {
                     .padding(20)
             }
         }
+        .overlay(alignment: .topLeading) {
+            if DemoMode.shared.isActive && !isLoading {
+                HStack(spacing: 10) {
+                    Image(systemName: "flask.fill")
+                    Text("DEMO MODE")
+                        .font(.caption.bold())
+                }
+                .foregroundColor(.cyan)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .background(Color.cyan.opacity(0.18), in: Capsule())
+                .overlay(
+                    Capsule().stroke(Color.cyan.opacity(0.5), lineWidth: 1)
+                )
+                .padding(20)
+                .allowsHitTesting(false)
+            }
+        }
     }
 
     private func resetIdleTimer() {

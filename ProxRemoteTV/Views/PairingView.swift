@@ -113,6 +113,27 @@ struct PairingView: View {
             .buttonStyle(.borderedProminent)
             .tint(.cyan)
             .padding(.top, 16)
+
+            Text("Don't have an iPhone with ProxRemote?")
+                .font(.caption)
+                .foregroundColor(.secondary)
+                .padding(.top, 24)
+
+            Button {
+                DemoMode.shared.enter()
+                appState.addServer(.demo)
+                pairedServerName = ServerProfile.demo.displayName
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                    dismiss()
+                }
+            } label: {
+                Label("Try Demo Mode", systemImage: "play.circle")
+                    .font(.title3)
+                    .padding(.horizontal, 40)
+                    .padding(.vertical, 16)
+            }
+            .buttonStyle(.bordered)
+            .tint(.cyan)
         }
     }
 

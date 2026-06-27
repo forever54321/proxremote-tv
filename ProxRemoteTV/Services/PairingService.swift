@@ -153,7 +153,9 @@ class PairingService: ObservableObject {
             username: serverData["username"] as? String ?? "root",
             password: serverData["password"] as? String ?? "",
             realm: serverData["realm"] as? String ?? "pam",
-            trustSelfSigned: serverData["trustSelfSigned"] as? Bool ?? true
+            trustSelfSigned: serverData["trustSelfSigned"] as? Bool ?? true,
+            tokenId: serverData["tokenId"] as? String,
+            tokenSecret: serverData["tokenSecret"] as? String
         )
 
         DispatchQueue.main.async { [weak self] in

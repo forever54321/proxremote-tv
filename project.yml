@@ -15,13 +15,25 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.proxremote.tv
-        MARKETING_VERSION: "1.0.0"
-        CURRENT_PROJECT_VERSION: "1"
+        MARKETING_VERSION: "1.0.3"
+        CURRENT_PROJECT_VERSION: "8"
         INFOPLIST_FILE: ProxRemoteTV/Info.plist
         SWIFT_VERSION: "5.9"
-        DEVELOPMENT_TEAM: ""
+        DEVELOPMENT_TEAM: "3H92QZGF9X"
+        # Names the tvOS Brand Assets set so Xcode emits the required
+        # CFBundleIcons / TVTopShelfImage Info.plist keys (ASC errors otherwise).
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
       configs:
         Debug:
           SWIFT_OPTIMIZATION_LEVEL: "-Onone"
         Release:
           SWIFT_OPTIMIZATION_LEVEL: "-O"
+schemes:
+  ProxRemoteTV:
+    build:
+      targets:
+        ProxRemoteTV: all
+    run:
+      config: Debug
+    archive:
+      config: Release

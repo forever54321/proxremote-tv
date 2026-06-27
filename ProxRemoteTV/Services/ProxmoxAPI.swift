@@ -13,8 +13,18 @@ class ProxmoxAPI: ObservableObject {
     init(server: ServerProfile) {
         self.server = server
 
+        // Auto-activate demo mode when the demo server profile is used.
+        // DemoMode is in-memory only, so after an app relaunch the persisted
+        // demo server would otherwise try to hit the network.
+        if server.id == "demo-cluster" {
+            DemoMode.shared.enter()
+        }
+
         if server.trustSelfSigned {
-            let delegate = SelfSignedDelegate()
+            // Retain the delegate — URLSession holds it weakly, so a local
+            // would be released and pinning would silently stop working.
+            let delegate = PinnedTLSDelegate()
+            self.tlsDelegate = delegate
             self.session = URLSession(
                 configuration: .default,
                 delegate: delegate,
@@ -25,9 +35,22 @@ class ProxmoxAPI: ObservableObject {
         }
     }
 
+    private var tlsDelegate: PinnedTLSDelegate?
+
     // MARK: - Auth
 
     func login() async throws {
+        if DemoMode.shared.isActive {
+            ticket = "DEMO:fake"
+            csrf = "DEMO:fake"
+            return
+        }
+        // API-token auth needs no ticket exchange — every request carries the
+        // Authorization header instead (see `authorize`).
+        if server.usesApiToken {
+            ticket = "TOKEN"
+            return
+        }
         let url = URL(string: "\(server.baseURL)/api2/json/access/ticket")!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -35,7 +58,15 @@ class ProxmoxAPI: ObservableObject {
             "application/x-www-form-urlencoded",
             forHTTPHeaderField: "Content-Type"
         )
-        let body = "username=\(server.username)@\(server.realm)&password=\(server.password)"
+        // Percent-encode each field — a password containing & + % = would
+        // otherwise corrupt the form body or be mis-parsed by Proxmox.
+        func enc(_ s: String) -> String {
+            var allowed = CharacterSet.alphanumerics
+            allowed.insert(charactersIn: "-._~")   // RFC 3986 unreserved
+            return s.addingPercentEncoding(withAllowedCharacters: allowed) ?? s
+        }
+        let user = "\(server.username)@\(server.realm)"
+        let body = "username=\(enc(user))&password=\(enc(server.password))"
         request.httpBody = body.data(using: .utf8)
 
         let (data, _) = try await session.data(for: request)
@@ -55,6 +86,7 @@ class ProxmoxAPI: ObservableObject {
     // MARK: - API Calls
 
     func fetchClusterResources() async throws -> [ClusterResource] {
+        if DemoMode.shared.isActive { return DemoData.clusterResources() }
         let data = try await get("/api2/json/cluster/resources")
         let list = (data["data"] as? [[String: Any]]) ?? []
         return list.compactMap { dict in
@@ -81,6 +113,9 @@ class ProxmoxAPI: ObservableObject {
     }
 
     func fetchClusterTasks(limit: Int = 50) async throws -> [ClusterTask] {
+        if DemoMode.shared.isActive {
+            return Array(DemoData.clusterTasks().prefix(limit))
+        }
         let data = try await get("/api2/json/cluster/tasks")
         let list = (data["data"] as? [[String: Any]]) ?? []
         return list.prefix(limit).compactMap { dict in
@@ -103,23 +138,31 @@ class ProxmoxAPI: ObservableObject {
     }
 
     func fetchNodeStatus(node: String) async throws -> NodeStatus {
+        if DemoMode.shared.isActive { return DemoData.nodeStatus(node: node) }
         let data = try await get("/api2/json/nodes/\(node)/status")
         let dict = (data["data"] as? [String: Any]) ?? [:]
         return NodeStatus(from: dict)
     }
 
     func fetchVMConfig(node: String, vmid: Int, type: String) async throws -> VMConfig {
+        if DemoMode.shared.isActive {
+            return DemoData.vmConfig(vmid: vmid, type: type)
+        }
         let data = try await get("/api2/json/nodes/\(node)/\(type)/\(vmid)/config")
         let dict = (data["data"] as? [String: Any]) ?? [:]
         return VMConfig(from: dict)
     }
 
     func fetchVMStatus(node: String, vmid: Int, type: String) async throws -> [String: Any] {
+        if DemoMode.shared.isActive {
+            return DemoData.vmStatus(vmid: vmid, type: type, isRunning: vmid != 111)
+        }
         let data = try await get("/api2/json/nodes/\(node)/\(type)/\(vmid)/status/current")
         return (data["data"] as? [String: Any]) ?? [:]
     }
 
     func fetchSnapshots(node: String, vmid: Int, type: String) async throws -> [Snapshot] {
+        if DemoMode.shared.isActive { return DemoData.snapshots() }
         let data = try await get("/api2/json/nodes/\(node)/\(type)/\(vmid)/snapshot")
         let list = (data["data"] as? [[String: Any]]) ?? []
         return list.compactMap { dict in
@@ -137,24 +180,39 @@ class ProxmoxAPI: ObservableObject {
 
     // MARK: - Helpers
 
+    /// Applies the right auth to a request: a `PVEAPIToken` Authorization
+    /// header in token mode, or the ticket cookie in password mode.
+    private func authorize(_ request: inout URLRequest) {
+        if server.usesApiToken {
+            request.setValue(
+                "PVEAPIToken=\(server.tokenId!)=\(server.tokenSecret!)",
+                forHTTPHeaderField: "Authorization"
+            )
+        } else if let ticket {
+            request.setValue("PVEAuthCookie=\(ticket)", forHTTPHeaderField: "Cookie")
+        }
+    }
+
     private func get(_ path: String) async throws -> [String: Any] {
+        // Token mode needs no login; password mode needs a ticket first.
         if ticket == nil { try await login() }
 
         let url = URL(string: "\(server.baseURL)\(path)")!
         var request = URLRequest(url: url)
-        request.setValue("PVEAuthCookie=\(ticket!)", forHTTPHeaderField: "Cookie")
+        authorize(&request)
 
         let (data, response) = try await session.data(for: request)
 
         if let httpResponse = response as? HTTPURLResponse,
-           httpResponse.statusCode == 401 {
-            // Re-auth and retry
+           httpResponse.statusCode == 401,
+           !server.usesApiToken {
+            // Ticket expired — re-auth and retry once. (A 401 in token mode
+            // means a bad/revoked token; retrying wouldn't help, so we fall
+            // through and surface the response.)
+            ticket = nil
             try await login()
             var retryRequest = URLRequest(url: url)
-            retryRequest.setValue(
-                "PVEAuthCookie=\(ticket!)",
-                forHTTPHeaderField: "Cookie"
-            )
+            authorize(&retryRequest)
             let (retryData, _) = try await session.data(for: retryRequest)
             return (try JSONSerialization.jsonObject(with: retryData) as? [String: Any]) ?? [:]
         }
@@ -175,19 +233,51 @@ class ProxmoxAPI: ObservableObject {
     }
 }
 
-// MARK: - Self-signed cert support
+// MARK: - Self-signed cert support (TOFU pinned)
 
-class SelfSignedDelegate: NSObject, URLSessionDelegate {
+/// Validates TLS server trust with trust-on-first-use pinning for self-signed
+/// Proxmox certs. A normally-valid (CA-signed) cert is accepted outright; a
+/// self-signed cert is accepted only if its leaf fingerprint matches the one
+/// first seen for that host:port — a changed cert is rejected as MITM.
+/// Replaces the prior delegate that accepted ANY certificate.
+final class PinnedTLSDelegate: NSObject, URLSessionDelegate {
     func urlSession(
         _ session: URLSession,
         didReceive challenge: URLAuthenticationChallenge,
         completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void
     ) {
-        if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust,
-           let trust = challenge.protectionSpace.serverTrust {
-            completionHandler(.useCredential, URLCredential(trust: trust))
-        } else {
+        guard challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust,
+              let trust = challenge.protectionSpace.serverTrust
+        else {
             completionHandler(.performDefaultHandling, nil)
+            return
+        }
+
+        let host = challenge.protectionSpace.host
+        let port = challenge.protectionSpace.port
+
+        // 1) Accept if the chain is valid against the system trust store
+        //    (proper CA-signed cert — e.g. a reverse proxy with Let's Encrypt).
+        if SecTrustEvaluateWithError(trust, nil) {
+            completionHandler(.useCredential, URLCredential(trust: trust))
+            return
+        }
+
+        // 2) Otherwise TOFU-pin the leaf cert.
+        guard let leaf = leafCertificate(of: trust),
+              TofuPinStore.shared.acceptOrPin(certificate: leaf, host: host, port: port)
+        else {
+            completionHandler(.cancelAuthenticationChallenge, nil)
+            return
+        }
+        completionHandler(.useCredential, URLCredential(trust: trust))
+    }
+
+    private func leafCertificate(of trust: SecTrust) -> SecCertificate? {
+        if #available(tvOS 15.0, *) {
+            return (SecTrustCopyCertificateChain(trust) as? [SecCertificate])?.first
+        } else {
+            return SecTrustGetCertificateAtIndex(trust, 0)
         }
     }
 }

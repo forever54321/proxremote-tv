@@ -9,8 +9,21 @@ struct ServerProfile: Codable, Identifiable, Hashable {
     let password: String
     let realm: String
     let trustSelfSigned: Bool
+    // Revocable Proxmox API token ("user@realm!tokenid" + secret). Preferred
+    // over the password since pairing 2.x. Optional for back-compat with
+    // profiles paired by older builds (which sent the password). Decodes to
+    // nil when absent.
+    let tokenId: String?
+    let tokenSecret: String?
 
     var baseURL: String { "https://\(host):\(port)" }
+
+    /// True when this profile authenticates with an API token rather than a
+    /// password ticket.
+    var usesApiToken: Bool {
+        guard let tokenId, let tokenSecret else { return false }
+        return !tokenId.isEmpty && !tokenSecret.isEmpty
+    }
 }
 
 struct ClusterResource: Codable, Identifiable, Hashable {
