@@ -1,0 +1,9 @@
+{
+  "id" : "8070cb5a-df51-4532-b9cb-63d20b24b0d2",
+  "targets" : [
+    {
+      "id" : "da98069e-fa55-40e0-a212-dc16789fc245",
+      "name" : "ProxRemoteTV"
+    }
+  ]
+}

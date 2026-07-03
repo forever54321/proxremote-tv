@@ -21,9 +21,11 @@ enum KeychainStore {
         attrs[kSecValueData as String] = data
         attrs[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
         let status = SecItemAdd(attrs as CFDictionary, nil)
+        #if DEBUG
         if status != errSecSuccess {
             print("[KeychainStore] save failed for \(account): \(status)")
         }
+        #endif
         return status == errSecSuccess
     }
 

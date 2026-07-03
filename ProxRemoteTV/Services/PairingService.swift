@@ -67,7 +67,9 @@ class PairingService: ObservableObject {
             }
             listener?.start(queue: .main)
         } catch {
+            #if DEBUG
             print("Failed to start listener: \(error)")
+            #endif
             isPairing = false
             return
         }

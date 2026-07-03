@@ -183,9 +183,10 @@ class ProxmoxAPI: ObservableObject {
     /// Applies the right auth to a request: a `PVEAPIToken` Authorization
     /// header in token mode, or the ticket cookie in password mode.
     private func authorize(_ request: inout URLRequest) {
-        if server.usesApiToken {
+        if server.usesApiToken,
+           let tokenId = server.tokenId, let tokenSecret = server.tokenSecret {
             request.setValue(
-                "PVEAPIToken=\(server.tokenId!)=\(server.tokenSecret!)",
+                "PVEAPIToken=\(tokenId)=\(tokenSecret)",
                 forHTTPHeaderField: "Authorization"
             )
         } else if let ticket {
