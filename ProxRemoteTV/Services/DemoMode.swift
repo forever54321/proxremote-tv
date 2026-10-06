@@ -1,15 +1,5 @@
 import Foundation
 
-final class DemoMode {
-    static let shared = DemoMode()
-    private init() {}
-
-    private(set) var isActive: Bool = false
-
-    func enter() { isActive = true }
-    func exit() { isActive = false }
-}
-
 extension ServerProfile {
     static let demo = ServerProfile(
         id: "demo-cluster",

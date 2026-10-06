@@ -27,10 +27,13 @@ class PairingService: ObservableObject {
     @Published var localIP: String = ""
     @Published var isPairing = false
     @Published var receivedServer: ServerProfile?
+    /// Shown on the pairing screen when the listener fails or times out.
+    @Published var errorMessage: String?
 
     private var listener: NWListener?
     private let port: UInt16 = 9876
-    private let ttlSeconds: TimeInterval = 60
+    // The iPhone needs time to mint the token(s) after scanning.
+    private let ttlSeconds: TimeInterval = 120
     private let maxAttempts = 3
 
     private var privateKey: Curve25519.KeyAgreement.PrivateKey?
@@ -51,9 +54,14 @@ class PairingService: ObservableObject {
 
     func startPairing() {
         pairingCode = String(format: "%06d", Int.random(in: 100000...999999))
-        localIP = getLocalIP() ?? "0.0.0.0"
         privateKey = Curve25519.KeyAgreement.PrivateKey()
         attemptCount = 0
+        errorMessage = nil
+        guard let ip = getLocalIP() else {
+            errorMessage = "This Apple TV isn't on a network. Connect it to Wi-Fi or Ethernet and try again."
+            return
+        }
+        localIP = ip
         isPairing = true
 
         do {
@@ -65,12 +73,21 @@ class PairingService: ObservableObject {
             listener?.newConnectionHandler = { [weak self] connection in
                 self?.handleConnection(connection)
             }
+            listener?.stateUpdateHandler = { [weak self] state in
+                if case .failed = state {
+                    DispatchQueue.main.async {
+                        self?.stopPairing()
+                        self?.errorMessage = "Couldn't start pairing (port \(self?.port ?? 0) is busy). Try again."
+                    }
+                }
+            }
             listener?.start(queue: .main)
         } catch {
             #if DEBUG
             print("Failed to start listener: \(error)")
             #endif
             isPairing = false
+            errorMessage = "Couldn't start pairing. Try again."
             return
         }
 
@@ -81,6 +98,7 @@ class PairingService: ObservableObject {
             repeats: false
         ) { [weak self] _ in
             self?.stopPairing()
+            self?.errorMessage = "Pairing timed out. Start again and scan the code with your iPhone."
         }
     }
 

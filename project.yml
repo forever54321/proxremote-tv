@@ -16,7 +16,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.proxremote.tv
         MARKETING_VERSION: "1.0.4"
-        CURRENT_PROJECT_VERSION: "9"
+        CURRENT_PROJECT_VERSION: "10"
         INFOPLIST_FILE: ProxRemoteTV/Info.plist
         SWIFT_VERSION: "5.9"
         DEVELOPMENT_TEAM: "3H92QZGF9X"

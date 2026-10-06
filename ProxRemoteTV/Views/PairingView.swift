@@ -95,6 +95,11 @@ struct PairingView: View {
             Text("Pair with iPhone")
                 .font(.largeTitle.bold())
 
+            if let msg = pairing.errorMessage {
+                Label(msg, systemImage: "exclamationmark.triangle.fill")
+                    .foregroundColor(.orange)
+            }
+
             Text(
                 "Open ProxRemote on your iPhone, tap the TV icon in the " +
                 "server list, then scan the QR code that appears here."
@@ -120,7 +125,6 @@ struct PairingView: View {
                 .padding(.top, 24)
 
             Button {
-                DemoMode.shared.enter()
                 appState.addServer(.demo)
                 pairedServerName = ServerProfile.demo.displayName
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {

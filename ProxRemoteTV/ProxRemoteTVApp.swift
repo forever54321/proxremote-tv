@@ -56,17 +56,24 @@ class AppState: ObservableObject {
         }
     }
 
+    /// Pairing again REPLACES the saved profile: the iPhone rotates the API
+    /// token on every pairing, so keeping the old entry left a dead token.
+    /// A fresh pairing is also an explicit re-trust, so the old certificate
+    /// pin is dropped (a renewed Proxmox cert would otherwise lock us out).
     func addServer(_ server: ServerProfile) {
-        if !pairedServers.contains(where: { $0.host == server.host }) {
+        if let i = pairedServers.firstIndex(where: { $0.host == server.host && $0.port == server.port }) {
+            TofuPinStore.shared.forget(host: server.host, port: server.port)
+            pairedServers[i] = server
+        } else {
             pairedServers.append(server)
-            saveServers()
         }
+        saveServers()
     }
 
     func removeServer(_ server: ServerProfile) {
         pairedServers.removeAll { $0.id == server.id }
-        if server.id == "demo-cluster" {
-            DemoMode.shared.exit()
+        if !server.isDemo {
+            TofuPinStore.shared.forget(host: server.host, port: server.port)
         }
         saveServers()
     }

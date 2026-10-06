@@ -18,6 +18,8 @@ struct ServerProfile: Codable, Identifiable, Hashable {
 
     var baseURL: String { "https://\(host):\(port)" }
 
+    var isDemo: Bool { id == "demo-cluster" }
+
     /// True when this profile authenticates with an API token rather than a
     /// password ticket.
     var usesApiToken: Bool {
@@ -27,6 +29,9 @@ struct ServerProfile: Codable, Identifiable, Hashable {
 }
 
 struct ClusterResource: Codable, Identifiable, Hashable {
+    /// PVE's own id ("qemu/100", "storage/pve1/local"). Shared storage is
+    /// listed once per node, so name alone isn't unique.
+    var pveId: String? = nil
     let type: String       // node, qemu, lxc, storage
     let status: String     // running, stopped, online, offline
     let name: String
@@ -40,13 +45,13 @@ struct ClusterResource: Codable, Identifiable, Hashable {
     let maxdisk: Int?
     let uptime: Int?
 
-    var id: String { "\(type)/\(vmid ?? 0)/\(name)" }
+    var id: String { pveId ?? "\(type)/\(node)/\(vmid ?? 0)/\(name)" }
 
     var isNode: Bool { type == "node" }
     var isVM: Bool { type == "qemu" }
     var isContainer: Bool { type == "lxc" }
     var isStorage: Bool { type == "storage" }
-    var isRunning: Bool { status == "running" || status == "online" }
+    var isRunning: Bool { status == "running" || status == "online" || status == "available" }
     var isStopped: Bool { status == "stopped" || status == "offline" }
 
     var displayType: String {
@@ -92,7 +97,14 @@ struct VMConfig: Codable {
         name = dict["name"] as? String
         cores = dict["cores"] as? Int
         sockets = dict["sockets"] as? Int
-        memory = dict["memory"] as? Int
+        // PVE 8.1+ may return memory as a string ("4096" or "current=4096").
+        if let m = dict["memory"] as? Int {
+            memory = m
+        } else if let s = dict["memory"] as? String {
+            memory = Int(s.replacingOccurrences(of: "current=", with: "").split(separator: ",").first ?? "")
+        } else {
+            memory = nil
+        }
         balloon = dict["balloon"] as? Int
         ostype = dict["ostype"] as? String
         boot = dict["boot"] as? String

@@ -13,13 +13,6 @@ class ProxmoxAPI: ObservableObject {
     init(server: ServerProfile) {
         self.server = server
 
-        // Auto-activate demo mode when the demo server profile is used.
-        // DemoMode is in-memory only, so after an app relaunch the persisted
-        // demo server would otherwise try to hit the network.
-        if server.id == "demo-cluster" {
-            DemoMode.shared.enter()
-        }
-
         if server.trustSelfSigned {
             // Retain the delegate — URLSession holds it weakly, so a local
             // would be released and pinning would silently stop working.
@@ -37,10 +30,14 @@ class ProxmoxAPI: ObservableObject {
 
     private var tlsDelegate: PinnedTLSDelegate?
 
+    /// Demo data is tied to the demo profile itself — never a global switch,
+    /// so opening the demo can't make a real server show fake data.
+    private var isDemo: Bool { server.isDemo }
+
     // MARK: - Auth
 
     func login() async throws {
-        if DemoMode.shared.isActive {
+        if isDemo {
             ticket = "DEMO:fake"
             csrf = "DEMO:fake"
             return
@@ -86,22 +83,25 @@ class ProxmoxAPI: ObservableObject {
     // MARK: - API Calls
 
     func fetchClusterResources() async throws -> [ClusterResource] {
-        if DemoMode.shared.isActive { return DemoData.clusterResources() }
+        if isDemo { return DemoData.clusterResources() }
         let data = try await get("/api2/json/cluster/resources")
         let list = (data["data"] as? [[String: Any]]) ?? []
         return list.compactMap { dict in
+            // Real PVE: nodes carry no "name" (it's "node"), storage uses
+            // "storage". Requiring "name" dropped every node and storage.
             guard let type = dict["type"] as? String,
-                  let status = dict["status"] as? String,
-                  let name = dict["name"] as? String,
-                  let node = dict["node"] as? String
+                  let node = dict["node"] as? String,
+                  let name = (dict["name"] ?? dict["storage"] ?? dict["node"]) as? String
             else { return nil }
+            let status = (dict["status"] as? String) ?? "unknown"
             return ClusterResource(
+                pveId: dict["id"] as? String,
                 type: type,
                 status: status,
                 name: name,
                 node: node,
                 vmid: dict["vmid"] as? Int,
-                cpu: dict["cpu"] as? Double,
+                cpu: (dict["cpu"] as? NSNumber)?.doubleValue,
                 maxcpu: dict["maxcpu"] as? Int,
                 mem: dict["mem"] as? Int,
                 maxmem: dict["maxmem"] as? Int,
@@ -113,7 +113,7 @@ class ProxmoxAPI: ObservableObject {
     }
 
     func fetchClusterTasks(limit: Int = 50) async throws -> [ClusterTask] {
-        if DemoMode.shared.isActive {
+        if isDemo {
             return Array(DemoData.clusterTasks().prefix(limit))
         }
         let data = try await get("/api2/json/cluster/tasks")
@@ -132,20 +132,23 @@ class ProxmoxAPI: ObservableObject {
                 starttime: starttime,
                 endtime: dict["endtime"] as? Int,
                 status: dict["status"] as? String,
-                exitstatus: dict["exitstatus"] as? String
+                // /cluster/tasks puts a finished task's result in "status"
+                // ("OK", "WARNINGS: n" or the error); "exitstatus" is only on
+                // the per-task status endpoint.
+                exitstatus: (dict["exitstatus"] as? String) ?? (dict["endtime"] != nil ? dict["status"] as? String : nil)
             )
         }
     }
 
     func fetchNodeStatus(node: String) async throws -> NodeStatus {
-        if DemoMode.shared.isActive { return DemoData.nodeStatus(node: node) }
+        if isDemo { return DemoData.nodeStatus(node: node) }
         let data = try await get("/api2/json/nodes/\(node)/status")
         let dict = (data["data"] as? [String: Any]) ?? [:]
         return NodeStatus(from: dict)
     }
 
     func fetchVMConfig(node: String, vmid: Int, type: String) async throws -> VMConfig {
-        if DemoMode.shared.isActive {
+        if isDemo {
             return DemoData.vmConfig(vmid: vmid, type: type)
         }
         let data = try await get("/api2/json/nodes/\(node)/\(type)/\(vmid)/config")
@@ -154,7 +157,7 @@ class ProxmoxAPI: ObservableObject {
     }
 
     func fetchVMStatus(node: String, vmid: Int, type: String) async throws -> [String: Any] {
-        if DemoMode.shared.isActive {
+        if isDemo {
             return DemoData.vmStatus(vmid: vmid, type: type, isRunning: vmid != 111)
         }
         let data = try await get("/api2/json/nodes/\(node)/\(type)/\(vmid)/status/current")
@@ -162,7 +165,7 @@ class ProxmoxAPI: ObservableObject {
     }
 
     func fetchSnapshots(node: String, vmid: Int, type: String) async throws -> [Snapshot] {
-        if DemoMode.shared.isActive { return DemoData.snapshots() }
+        if isDemo { return DemoData.snapshots() }
         let data = try await get("/api2/json/nodes/\(node)/\(type)/\(vmid)/snapshot")
         let list = (data["data"] as? [[String: Any]]) ?? []
         return list.compactMap { dict in
@@ -214,11 +217,48 @@ class ProxmoxAPI: ObservableObject {
             try await login()
             var retryRequest = URLRequest(url: url)
             authorize(&retryRequest)
-            let (retryData, _) = try await session.data(for: retryRequest)
-            return (try JSONSerialization.jsonObject(with: retryData) as? [String: Any]) ?? [:]
+            let (retryData, retryResponse) = try await session.data(for: retryRequest)
+            try check(retryResponse)
+            return try parse(retryData)
         }
 
-        return (try JSONSerialization.jsonObject(with: data) as? [String: Any]) ?? [:]
+        try check(response)
+        return try parse(data)
+    }
+
+    /// PVE errors (401 revoked token, 403, 500, 595 offline node) used to be
+    /// parsed as empty data — an empty dashboard with no explanation.
+    private func check(_ response: URLResponse) throws {
+        guard let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) else { return }
+        if http.statusCode == 401 && server.usesApiToken {
+            throw APIError.requestFailed("The Apple TV's access token was rejected. Pair again from ProxRemote on your iPhone.")
+        }
+        if http.statusCode == 401 { throw APIError.authFailed }
+        if http.statusCode == 595 {
+            throw APIError.requestFailed("That node is unreachable (offline or no route).")
+        }
+        throw APIError.requestFailed("Server error \(http.statusCode): \(HTTPURLResponse.localizedString(forStatusCode: http.statusCode))")
+    }
+
+    private func parse(_ data: Data) throws -> [String: Any] {
+        guard let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            throw APIError.requestFailed("Unexpected reply from the server.")
+        }
+        return obj
+    }
+
+    /// Turns transport errors into something a person can act on.
+    static func describe(_ error: Error) -> String {
+        if let u = error as? URLError {
+            switch u.code {
+            case .cancelled:
+                return "The server's certificate changed. Remove this server and pair it again from your iPhone."
+            case .timedOut, .cannotConnectToHost, .cannotFindHost, .networkConnectionLost, .notConnectedToInternet:
+                return "Can't reach the server. Check that the Apple TV and Proxmox are on the same network."
+            default: break
+            }
+        }
+        return error.localizedDescription
     }
 
     enum APIError: LocalizedError {

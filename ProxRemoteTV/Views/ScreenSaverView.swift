@@ -69,6 +69,9 @@ struct ScreenSaverView: View {
                     .padding(.bottom, 30)
             }
         }
+        // Focusable so remote presses actually reach the handlers below
+        // ("Press any button to exit" did nothing before).
+        .focusable()
         .onAppear { startCycle() }
         .onDisappear { timer?.invalidate() }
         .onTapGesture { onDismiss() }

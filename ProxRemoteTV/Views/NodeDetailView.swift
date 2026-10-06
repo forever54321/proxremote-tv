@@ -90,17 +90,24 @@ struct NodeDetailView: View {
             }
         }
         .navigationTitle(resource.name)
-        .task { await load() }
+        .task {
+            await load()
+            while !Task.isCancelled {
+                try? await Task.sleep(nanoseconds: 30_000_000_000)
+                if Task.isCancelled { break }
+                if let s = try? await api.fetchNodeStatus(node: resource.node) { status = s }
+            }
+        }
     }
 
     private func load() async {
         isLoading = true
         error = nil
         do {
-            status = try await api.fetchNodeStatus(node: resource.name)
+            status = try await api.fetchNodeStatus(node: resource.node)
             isLoading = false
         } catch {
-            self.error = error.localizedDescription
+            self.error = ProxmoxAPI.describe(error)
             isLoading = false
         }
     }

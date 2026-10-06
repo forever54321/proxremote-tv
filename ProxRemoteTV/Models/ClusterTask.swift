@@ -14,7 +14,8 @@ struct ClusterTask: Identifiable, Hashable {
 
     var isRunning: Bool { endtime == nil }
     var isFailed: Bool {
-        if let s = exitstatus { return s != "OK" }
+        // Warnings finished the job — the PVE web UI doesn't show them as failures.
+        if let s = exitstatus { return s != "OK" && !s.hasPrefix("WARNINGS") }
         return false
     }
     var isOK: Bool { exitstatus == "OK" }

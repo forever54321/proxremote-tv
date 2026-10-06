@@ -11,6 +11,7 @@ struct DashboardView: View {
     @State private var refreshTask: Task<Void, Never>?
     @State private var idleTimer: Timer?
     @State private var showScreenSaver = false
+    @FocusState private var focusedID: String?
     private let autoRefreshInterval: TimeInterval = 30
     private let idleTimeout: TimeInterval = 90
 
@@ -28,7 +29,7 @@ struct DashboardView: View {
         Group {
             if isLoading {
                 ProgressView("Connecting to \(server.displayName)...")
-            } else if let error = error {
+            } else if let error = error, resources.isEmpty {
                 VStack(spacing: 20) {
                     Image(systemName: "exclamationmark.triangle")
                         .font(.system(size: 60))
@@ -40,11 +41,24 @@ struct DashboardView: View {
             } else {
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 50) {
-                        // Recent activity / notifications
-                        NotificationsView(tasks: tasks)
+                        if let error {
+                            // Keep the last good data on screen; just say the
+                            // latest refresh failed (no more full-screen flip).
+                            Label("Last refresh failed: \(error)", systemImage: "exclamationmark.triangle.fill")
+                                .font(.callout)
+                                .foregroundColor(.orange)
+                        }
+
+                        // Recent activity / notifications — focusable so the
+                        // remote can scroll back up to them.
+                        Button {} label: { NotificationsView(tasks: tasks) }
+                            .buttonStyle(.card)
+                            .focused($focusedID, equals: "activity")
 
                         // Summary
-                        summarySection
+                        Button {} label: { summarySection.padding(8) }
+                            .buttonStyle(.card)
+                            .focused($focusedID, equals: "summary")
 
                         // Nodes
                         if !nodes.isEmpty {
@@ -93,10 +107,12 @@ struct DashboardView: View {
             refreshTask?.cancel()
             idleTimer?.invalidate()
         }
-        .fullScreenCover(isPresented: $showScreenSaver) {
+        // Any remote movement counts as activity, so the screen saver only
+        // appears after 90 s of real idleness (it used to fire mid-browse).
+        .onChange(of: focusedID) { _ in resetIdleTimer() }
+        .fullScreenCover(isPresented: $showScreenSaver, onDismiss: { resetIdleTimer() }) {
             ScreenSaverView(nodes: nodes) {
                 showScreenSaver = false
-                resetIdleTimer()
             }
         }
         .overlay(alignment: .topTrailing) {
@@ -110,7 +126,7 @@ struct DashboardView: View {
             }
         }
         .overlay(alignment: .topLeading) {
-            if DemoMode.shared.isActive && !isLoading {
+            if server.isDemo && !isLoading {
                 HStack(spacing: 10) {
                     Image(systemName: "flask.fill")
                     Text("DEMO MODE")
@@ -242,6 +258,7 @@ struct DashboardView: View {
                         ResourceCard(resource: resource)
                     }
                     .buttonStyle(.card)
+                    .focused($focusedID, equals: resource.id)
                 }
             }
             .padding(.vertical, 16)
@@ -263,7 +280,10 @@ struct DashboardView: View {
                 spacing: 20
             ) {
                 ForEach(storage) { s in
-                    StorageCard(resource: s)
+                    // Focusable so the remote can scroll down to storage.
+                    Button {} label: { StorageCard(resource: s) }
+                        .buttonStyle(.card)
+                        .focused($focusedID, equals: s.id)
                 }
             }
         }
@@ -282,17 +302,19 @@ struct DashboardView: View {
 
     private func loadResources() async {
         if resources.isEmpty { isLoading = true }
-        error = nil
         do {
-            try await api.login()
+            // No explicit login: get() signs in lazily (password mode used to
+            // POST /access/ticket every 30 s).
             async let res = api.fetchClusterResources()
             async let tks = api.fetchClusterTasks()
             resources = try await res
             tasks = (try? await tks) ?? []
             lastUpdated = Date()
+            error = nil
             isLoading = false
         } catch {
-            self.error = error.localizedDescription
+            if (error as? CancellationError) != nil { return }
+            self.error = ProxmoxAPI.describe(error)
             isLoading = false
         }
     }

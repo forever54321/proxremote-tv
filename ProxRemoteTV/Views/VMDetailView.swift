@@ -48,7 +48,32 @@ struct VMDetailView: View {
             }
         }
         .navigationTitle(resource.name)
-        .task { await load() }
+        .task {
+            await load()
+            // Keep the gauges live while the page is open (was a one-time
+            // snapshot from the moment you opened it).
+            while !Task.isCancelled {
+                try? await Task.sleep(nanoseconds: 30_000_000_000)
+                if Task.isCancelled { break }
+                if let s = try? await api.fetchVMStatus(node: resource.node, vmid: resource.vmid ?? 0, type: resource.type) {
+                    statusData = s
+                }
+            }
+        }
+    }
+
+    // Live values from status/current, falling back to the dashboard snapshot.
+    private func num(_ key: String) -> Double? { (statusData[key] as? NSNumber)?.doubleValue }
+    private var isRunningNow: Bool {
+        if let s = statusData["status"] as? String { return s == "running" }
+        return resource.isRunning
+    }
+    private var cpuNow: Double { (num("cpu") ?? resource.cpu ?? 0) * 100 }
+    private var memNow: Int? { num("mem").map { Int($0) } ?? resource.mem }
+    private var maxMemNow: Int? { num("maxmem").map { Int($0) } ?? resource.maxmem }
+    private var memPercentNow: Double {
+        guard let m = memNow, let t = maxMemNow, t > 0 else { return 0 }
+        return Double(m) / Double(t) * 100
     }
 
     // MARK: - Status Header
@@ -101,20 +126,22 @@ struct VMDetailView: View {
 
     private var overviewTab: some View {
         VStack(alignment: .leading, spacing: 24) {
-            if resource.isRunning {
+            if isRunningNow {
                 HStack(spacing: 40) {
                     gaugeView(
                         "CPU",
-                        value: resource.cpuPercent,
+                        value: cpuNow,
                         color: .cyan
                     )
                     gaugeView(
                         "Memory",
-                        value: resource.memPercent,
-                        subtitle: "\(formatBytes(resource.mem)) / \(formatBytes(resource.maxmem))",
+                        value: memPercentNow,
+                        subtitle: "\(formatBytes(memNow)) / \(formatBytes(maxMemNow))",
                         color: .purple
                     )
-                    if resource.disk != nil {
+                    // Proxmox always reports disk 0 for QEMU VMs — only
+                    // containers have a real disk usage figure.
+                    if resource.isContainer, resource.disk != nil {
                         gaugeView(
                             "Disk",
                             value: resource.diskPercent,
@@ -221,6 +248,7 @@ struct VMDetailView: View {
                         }
                     }
                     .padding(.vertical, 8)
+                    .focusable()   // lets the remote scroll through long lists
                     Divider()
                 }
             }
@@ -254,7 +282,7 @@ struct VMDetailView: View {
             statusData = try await statusTask
             isLoading = false
         } catch {
-            self.error = error.localizedDescription
+            self.error = ProxmoxAPI.describe(error)
             isLoading = false
         }
     }
@@ -268,6 +296,7 @@ struct VMDetailView: View {
                 .fontWeight(.medium)
         }
         .font(.body)
+        .focusable()   // lets the remote scroll down long configs
     }
 
     private func gaugeView(
